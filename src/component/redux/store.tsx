@@ -1,5 +1,5 @@
 // store.js
-import { createStore } from 'redux';
+import {createStore} from 'redux';
 
 // Action types
 const ADD_ITEM = 'ADD_ITEM';
@@ -23,14 +23,14 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         items: state.items.map(item =>
-          item.id === action.payload.id ? action.payload : item
+          item.id === action.payload.id ? action.payload : item,
         ),
       };
     case TOGGLE_CART:
       return {
         ...state,
         items: state.items.map(item =>
-          item.id === action.payload ? { ...item, inCart: !item.inCart } : item
+          item.id === action.payload ? {...item, inCart: !item.inCart} : item,
         ),
       };
     default:
@@ -39,17 +39,17 @@ const reducer = (state = initialState, action) => {
 };
 
 // Action creators
-export const addItem = (item) => ({
+export const addItem = item => ({
   type: ADD_ITEM,
   payload: item,
 });
 
-export const updateItem = (item) => ({
+export const updateItem = item => ({
   type: UPDATE_ITEM,
   payload: item,
 });
 
-export const toggleCart = (itemId) => ({
+export const toggleCart = itemId => ({
   type: TOGGLE_CART,
   payload: itemId,
 });

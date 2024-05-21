@@ -1,38 +1,58 @@
-import React, { useState } from 'react';
-import { FlatList, SafeAreaView, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import React, {useState} from 'react';
+import {
+  FlatList,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+} from 'react-native';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 const API_KEY = '5bd2e0405c5b05e7f1dcda04a58619b5';
 ////// thi s api key is expired if you have another one then you can able to test .
 
-const App = () => {
-  const [lat, setLat] = useState(21.7644730);///default bhavnagar
+const Test = () => {
+  const [lat, setLat] = useState(21.764473); ///default bhavnagar
   const [long, setLong] = useState(72.151932);
   const [weatherData, setWeatherData] = useState([]);
-  
+
   const fetchData = () => {
     if (lat !== 0 && long !== 0) {
-      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&past_days=6`)
+      fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&past_days=6`,
+      )
         .then(response => response.json())
         .then(data => {
-          const { time, weather_code, temperature_2m_max, temperature_2m_min } = data.daily;
+          const {time, weather_code, temperature_2m_max, temperature_2m_min} =
+            data.daily;
 
-          if (time && weather_code && temperature_2m_max && temperature_2m_min && time.length === weather_code.length && time.length === temperature_2m_max.length && time.length === temperature_2m_min.length) {
+          if (
+            time &&
+            weather_code &&
+            temperature_2m_max &&
+            temperature_2m_min &&
+            time.length === weather_code.length &&
+            time.length === temperature_2m_max.length &&
+            time.length === temperature_2m_min.length
+          ) {
             const weatherData = time.map((date, index) => ({
               date,
               weatherCode: weather_code[index],
               temperatureMax: temperature_2m_max[index],
-              temperatureMin: temperature_2m_min[index]
+              temperatureMin: temperature_2m_min[index],
             }));
             setWeatherData(weatherData);
           } else {
             console.error('Invalid data structure:', data.daily);
           }
         })
-        .catch(error => console.error('Error fetching historical weather data:', error));
+        .catch(error =>
+          console.error('Error fetching historical weather data:', error),
+        );
     }
-  }
+  };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({item}) => {
     return (
       <View style={styles.itemContainer}>
         <Text style={styles.dateText}>Date: {item.date}</Text>
@@ -41,18 +61,18 @@ const App = () => {
         <Text style={styles.weatherText}>Weather Code: {item.weatherCode}</Text>
       </View>
     );
-  }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
         <GooglePlacesAutocomplete
-          placeholder='Search your city'
+          placeholder="Search your city"
           fetchDetails={true}
           onPress={(data, details = null) => {
             if (details?.geometry?.location !== undefined) {
-              setLat(details?.geometry?.location?.lat)
-              setLong(details?.geometry?.location?.lng)
+              setLat(details?.geometry?.location?.lat);
+              setLong(details?.geometry?.location?.lng);
             }
           }}
           query={{
@@ -73,8 +93,8 @@ const App = () => {
         keyExtractor={(item, index) => index.toString()}
       />
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -145,4 +165,4 @@ const Google_place_style = {
   },
 };
 
-export default App;
+export default Test;

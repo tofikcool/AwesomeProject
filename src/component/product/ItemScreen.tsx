@@ -1,28 +1,35 @@
-// ItemScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateItem, addItem } from '../redux/store';
-import ResponsivePixels from '../res/styles/ResponsivePixels';
-import Strings from '../res/Strings';
+import { updateItem, addItem, toggleCart } from '../redux/store';
+import { Toast } from 'native-base';
+import { showToast } from '../utils/Utils';
+
 export default function ItemScreen({ navigation, route }) {
-  const { itemId } = route.params;
-  const isEditing = itemId !== undefined;
-  const item = useSelector(state => state.items.find(item => item.id === itemId));
+  // let isEditing = itemId !== undefined;
+  const item = useSelector(state => state.items.find(item => item.id === id));
   const dispatch = useDispatch();
 
-  const [name, setName] = useState(item ? item.name : '');
+  const [isEditing, setIsEditing] = useState(item ? true : false);
   const [price, setPrice] = useState(item ? item.price : '');
   const [imageUri, setImageUri] = useState(item ? item.imageUri : null);
-
+  const [name, setName] = useState(item ? item.name : '');
+  const [id, setId] = useState(item ? item.id : undefined);
   const items = useSelector(state => state.items);
 
   useEffect(() => {
-    if (isEditing && !item) {
-      navigation.goBack();
-    }
-    navigation.setOptions({ title: isEditing ? 'Edit Item' : 'Add Item' });
+    // if (isEditing && !item) {
+    //   navigation.goBack();
+    // }
+    navigation.setOptions({
+      title: isEditing ? 'Edit Item' : 'Add Item',
+      headerRight: () => (
+        <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+          <Text style={styles.cartButton}>Cart</Text>
+        </TouchableOpacity>
+      ),
+    });
   }, [isEditing, item, navigation]);
 
   const selectImage = () => {
@@ -32,62 +39,75 @@ export default function ItemScreen({ navigation, route }) {
       }
     });
   };
- const gotoCart=()=>{
-
-  navigation.navigate('Cart')
-  }
 
   const saveItem = () => {
-    const newItem = { id: isEditing ? itemId : Math.random(), name, price, imageUri };
+    const newItem = { id: isEditing ? id : Math.random(), name, price, imageUri, inCart: false };
     if (isEditing) {
       dispatch(updateItem(newItem));
+      showToast("updated successfully");
     } else {
       dispatch(addItem(newItem));
+      showToast("saved successfully");
     }
-    navigation.goBack();
+    setName("");
+    setImageUri("");
+    setPrice("");
+    setId("");
+    setIsEditing(false)
+    
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      {item.imageUri && <Image source={{ uri: item.imageUri }} style={styles.itemImage} />}
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemText}>{item.name}</Text>
-        <Text style={styles.itemText}>Price: {item.price}</Text>
+  const toggleItemCart = (itemId) => {
+    dispatch(toggleCart(itemId));
+  };
+
+  const editItem = (item) => {
+    setIsEditing(true)
+    setId(item.id)
+    setName(item.name);
+    setImageUri(item.imageUri);
+    setPrice(item.price);
+    
+  };
+
+  const renderItem = ({ item }) => {
+    return (
+      <View style={styles.itemContainer}>
+        {item.imageUri && <Image source={{ uri: item.imageUri }} style={styles.itemImage} />}
+        <View style={styles.itemDetails}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemPrice}>Price: {item.price}</Text>
+        </View>
+        <Button  title={item.inCart ? "Added to Cart" : "Add to Cart"} onPress={() => toggleItemCart(item.id)} />
+        <Button  title="Edit" onPress={() => editItem(item)} />
       </View>
-    </View>
-  );
+    );
+  };
+
+  const renderSeparator = () => {
+    return <View style={styles.separator} />;
+  };
 
   return (
     <View style={styles.container}>
-
-      <TouchableOpacity onPress={gotoCart}>
-        <View style={{padding:ResponsivePixels.size10,alignItems:"flex-end"}}>
-        
-            <Text>Cart</Text>
-
-        </View>
-      </TouchableOpacity>
-
-   
-
       <TouchableOpacity onPress={selectImage}>
         <View style={styles.imageContainer}>
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.image} />
           ) : (
-            <Text>{Strings.select_image}</Text>
+            <Text>Select an Image</Text>
           )}
         </View>
       </TouchableOpacity>
       <TextInput
         style={styles.input}
-        placeholder={Strings.name}
+        placeholder="Name"
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
-        placeholder={Strings.price}
+        placeholder="Price"
         value={price}
         onChangeText={setPrice}
         keyboardType="numeric"
@@ -99,6 +119,7 @@ export default function ItemScreen({ navigation, route }) {
         data={items}
         renderItem={renderItem}
         keyExtractor={item => item.id.toString()}
+        ItemSeparatorComponent={renderSeparator}
       />
     </View>
   );
@@ -112,7 +133,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 200,
+    height: 150,
     backgroundColor: '#f0f0f0',
     marginBottom: 16,
   },
@@ -136,10 +157,8 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     flexDirection: 'row',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginBottom: 8,
+    alignItems: 'center',
+    paddingVertical: 8,
   },
   itemImage: {
     width: 50,
@@ -149,7 +168,21 @@ const styles = StyleSheet.create({
   itemDetails: {
     flex: 1,
   },
-  itemText: {
+  itemName: {
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  itemPrice: {
+    fontSize: 14,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginVertical: 8,
+  },
+  cartButton: {
+    marginRight: 10,
+    fontSize: 16,
+    color: 'blue',
   },
 });

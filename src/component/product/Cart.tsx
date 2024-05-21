@@ -1,20 +1,32 @@
-import React, { useEffect } from 'react';
-import { View, Text, FlatList, Button, Image, StyleSheet, BackHandler } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { toggleCart } from '../redux/store';
+import React, {useEffect} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Button,
+  Image,
+  StyleSheet,
+  BackHandler,
+} from 'react-native';
+import {useSelector, useDispatch} from 'react-redux';
+import {toggleCart} from '../redux/store';
 
-export default function Cart() {
+export default function Cart({ navigation, route })  {
   const dispatch = useDispatch();
-  const cartItems = useSelector(state => state.items.filter(item => item.inCart));
+  const cartItems = useSelector(state =>
+    state.items.filter(item => item.inCart),
+  );
 
-  const removeItemFromCart = (itemId) => {
+  const removeItemFromCart = itemId => {
     dispatch(toggleCart(itemId));
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({item}) => {
     return (
       <View style={styles.cartItemContainer}>
-        {item.imageUri && <Image source={{ uri: item.imageUri }} style={styles.itemImage} />}
+        {item.imageUri && (
+          <Image source={{uri: item.imageUri}} style={styles.itemImage} />
+        )}
         <View style={styles.itemDetails}>
           <Text style={styles.itemName}>{item.name}</Text>
           <Text style={styles.itemPrice}>Price: {item.price}</Text>
@@ -34,8 +46,9 @@ export default function Cart() {
       () => {
         // Navigate back or handle back action as needed
         // For now, let's just return true to prevent default back behavior
+        navigation.goBack();
         return true;
-      }
+      },
     );
 
     return () => backHandler.remove();

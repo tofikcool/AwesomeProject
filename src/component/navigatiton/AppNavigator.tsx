@@ -2,15 +2,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider } from 'react-redux';
-import { TouchableOpacity, Text } from 'react-native';
-import ItemScreen from './src/component/product/ItemScreen';
-import store from './src/component/redux/store';
-import Cart from './src/component/product/Cart';
-import Login from './src/component/login/Login';
-
+import ItemScreen from '../product/ItemScreen';
+import Login from '../login/Login';
+import Cart from '../product/Cart';
 const Stack = createStackNavigator();
 
-export default function App() {
+export default function AppNavigator() {
   return (
     <Provider store={store}>
       <NavigationContainer>
@@ -18,14 +15,7 @@ export default function App() {
           <Stack.Screen 
             name="Home" 
             component={ItemScreen} 
-            options={({ navigation }) => ({
-              title: 'Home',
-              headerRight: () => (
-                <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
-                  <Text style={styles.cartButton}>Cart</Text>
-                </TouchableOpacity>
-              ),
-            })}
+            options={{ title: 'Home' }}
           />
           <Stack.Screen 
             name="Login" 
@@ -42,11 +32,3 @@ export default function App() {
     </Provider>
   );
 }
-
-const styles = {
-  cartButton: {
-    marginRight: 15,
-    color: 'blue',
-    fontSize: 16,
-  },
-};
